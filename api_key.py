@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-gemini_key = os.getenv("GEMINI_API_KEY")
+gemini_key = os.getenv("GOOGLE_API_KEY")
 if not gemini_key:
-    raise ValueError("Ошибка: GEMINI_API_KEY не найден в файле .env!")
+    raise ValueError("Ошибка: GOOGLE_API_KEY не найден в файле .env!")
 
-os.environ["GEMINI_API_KEY"] = gemini_key
+os.environ["GOOGLE_API_KEY"] = gemini_key
 
 model = init_chat_model("google_genai:gemini-3.5-flash")

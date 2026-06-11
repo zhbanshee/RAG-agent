@@ -52,7 +52,7 @@ pip install -r requirements.txt
 Create a file named `.env` in the root directory. Add your secret access tokens without quotes or spaces around the assignment operators:
 
 ```env
-GEMINI_API_KEY=your_actual_gemini_api_key
+GOOGLE_API_KEY=your_actual_google_api_key
 LANGSMITH_API_KEY=your_actual_langsmith_api_key
 LANGSMITH_TRACING=true
 

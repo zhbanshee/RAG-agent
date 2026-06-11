@@ -1,4 +1,4 @@
 import api_key
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
