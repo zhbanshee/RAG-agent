@@ -1,4 +1,4 @@
-from vector_store import vector_store      # <-- Импортируем базу
+from vector_store import vector_store     
 from load_split_doc import all_splits
 
 print("Начинаю запись документов в Chroma DB...")
