@@ -1,40 +1,46 @@
-from langchain.tools import tool
+from langchain.chat_models import init_chat_model
 from langchain_core.prompts import ChatPromptTemplate
-from api_key import model                
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
 from vector_store import vector_store
 
-@tool
-def retrieve_context(query: str):
-    """Retrieve information to help answer a query."""
-    retrieved_docs = vector_store.similarity_search(query, k=2)
-    # Возвращаем ТОЛЬКО текст документа
-    serialized = "\n\n".join(
-        (f"{doc.page_content}")
-        for doc in retrieved_docs
-    )
-    return serialized
+# запуска модели gemini 2.5 flash через встроенный инициализатор
+model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
 
-# Формируем шаблон
-prompt_template = ChatPromptTemplate.from_messages([
-    ("system", (
-        "Ты — официальный AI-ассистент Jois. "
-        "Используй предоставленный контекст для ответа на вопрос. "
-        "Если ответа нет в контексте — честно скажи, что не знаешь."
-    )),
-    ("human", "Контекст:\n{context}\n\nВопрос: {input}"),
-])
+# настраиваем поиск строго по топ-3 чанкам из базы знаний
+retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-# Функция-связка для цепочки
-def search_db(inputs):
-    query = inputs["input"]
-    return retrieve_context.invoke(query)
+# промпт, чтобы джойс не галлюцинировала
+prompt_template = ChatPromptTemplate.from_template("""
+Ты — официальный AI-ассистент Jois. 
+Отвечай на вопрос пользователя, строго опираясь ТОЛЬКО на предоставленный ниже контекст. 
+Если в контексте нет точного ответа на этот вопрос, честно ответь: 'Я не знаю'. 
+Не придумывай информацию от себя и не используй внешние знания.
 
-# Финальная цепочка (LCEL)
+Контекст:
+{context}
+
+Вопрос: {input}
+Ответ:
+""")
+
+def format_docs(docs):
+    # собираем текст из найденных кусков документов в одну строчку
+    return "\n\n".join(doc.page_content for doc in docs)
+
+# собираем финальную rag-цепочку 
 agent = (
+    # готовим данные для промпта
     {
-        "context": search_db, 
-        "input": lambda x: x["input"]
+        # берем вопрос пользователя, отправляем в базу знаний, находим 3 куска текста и склеиваем их
+        "context": retriever | format_docs, 
+        # пропускаем сам вопрос пользователя дальше без изменений, чтобы подставить его в {input}
+        "input": RunnablePassthrough()       
     }
-    | prompt_template
-    | model
+    # передаем собранные context и input в наш шаблон промпта
+    | prompt_template                       
+    # отправляем готовый заполненный текст в модель gemini flash для генерации ответа
+    | model                                 
+    # вытаскиваем из сырого ответа модели только чистую строку с текстом, убирая метаданные
+    | StrOutputParser()                     
 )

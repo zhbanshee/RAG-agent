@@ -6,18 +6,19 @@ This project implements a local Retrieval-Augmented Generation (RAG) system for 
 
 * `__pycache__/` — Directory containing compiled Python bytecode files (automatically generated).
 * `.venv/` — Isolated Python virtual environment containing project-specific dependencies.
-* `chroma_langchain_db/` — Local vector database storing embedded document chunks.
-* `knowledge_base/` — Directory containing raw text knowledge documents (.txt) for the Jois companion.
-* `.env` — Configuration file for private API keys and environment variables (excluded from Git).
-* `.gitignore` — Specifies intentionally untracked files that Git should ignore.
-* `api_key.py` — Script handling environment variable loading and Gemini model initialization.
-* `emb_model.py` — Script configuring the text embedding model used for vectorization.
-* `langsmith_settings.py` — Configuration for LangSmith tracing, logging, and evaluation metrics.
+* `chroma_langchain_db/` — Local vector database directory storing embedded document chunks.
+* `knowledge_base/` — Directory containing raw source documents (.txt, .pdf) about the Jois companion.
+* `.env` — Configuration file for secure storage of private API keys (excluded from Git).
+* `.gitignore` — Specifies intentionally untracked files and directories that Git should ignore.
+* `api_key.py` — Script handling environment variable validation and secure loading from the .env file.
+* `emb_model.py` — Module configuring the Google text embedding model used for vectorization.
+* `langsmith_settings.py` — Configuration for LangSmith tracing, logging, and evaluation metrics setup.
 * `load_split_doc.py` — Module responsible for loading raw text files and splitting them into optimal chunks.
-* `rag_agent.py` — Core logic assembling the context retrieval mechanism and the LangChain conversational agent.
-* `storing_doc.py` — Execution script that invokes document chunking and populates the Chroma vector database.
-* `test.py` — Automated testing suite executing the 10-question evaluation benchmark against the RAG system.
-* `vector_store.py` — Interface script managing connections, searches, and configurations for the ChromaDB store.
+* `rag_agent.py` — Core logic assembling the RAG pipeline and the strict prompt template for Gemini.
+* `storing_doc.py` — Execution script that triggers document chunking and populates the Chroma database.
+* `test.py` — Automated testing suite executing the 10-question evaluation benchmark.
+* `vector_store.py` — Interface script managing connections and similarity search configurations for ChromaDB.
+* `requirements.txt` — List of all project dependencies with strict version pinning.
 ---
 
 ## Installation and Setup
@@ -36,8 +37,8 @@ Activate the isolated virtual environment using venv:
 ```bash
 source .venv/bin/activate
 
-
 ```
+
 ### 3. Install Dependencies
 
 Install all required libraries, including LangChain, ChromaDB, and python-dotenv, using the package manager:
@@ -64,15 +65,15 @@ LANGSMITH_TRACING=true
 
 ### How to Add or Update Documents
 
-1. Place your new text files (.txt) or edit existing ones inside the `knowledge_base/` directory.
+1. Place your new text files (.txt, .pdf) or edit existing ones inside the `knowledge_base/` directory.
 2. Run the ingestion script to update the local vector database:
 
 ```bash
-   python storing_doc.py
+python storing_doc.py
 
 ```
 
-Note: If the database is already populated and your source documents have not changed, you can skip this step.
+*Note: If the database is already populated and your source documents have not changed, you can skip this step.*
 
 ### How to Launch the Chat / Test Suite
 
@@ -82,4 +83,3 @@ To execute the automated evaluation suite and verify the RAG system performance 
 python test.py
 
 ```
-

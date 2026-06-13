@@ -2,14 +2,9 @@ import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 
+# загрузка переменных окружения из файла .env
 load_dotenv()
 
-gemini_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-if not gemini_key:
+# проверка на наличие ключа, чтобы проект не упал молча
+if not os.getenv("GOOGLE_API_KEY"):
     raise ValueError("Ошибка: GOOGLE_API_KEY не найден в файле .env")
-
-os.environ["GOOGLE_API_KEY"] = gemini_key
-
-# Используем стандартный метод ядра LangChain, который у тебя работал.
-# Модель 'gemini-2.5-flash' идеально подходит для агентов.
-model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
