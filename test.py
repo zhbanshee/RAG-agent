@@ -1,6 +1,6 @@
 import time
 import langsmith_settings  # включаем трейсинг для langsmith
-from rag_agent import agent # импортируем нашу готовую rag-цепочку
+from rag_agent import agent, retriever # импортируем нашу готовую rag-цепочку
 
 # список из 10 вопросов для проверки
 questions = [
@@ -21,9 +21,17 @@ print("Запуск RAG-теста\n")
 # по очереди проходим по всем вопросам в цикле
 for i, q in enumerate(questions, 1):
     print(f"Вопрос {i}: {q}")
+    # извлекаем топ-3 фрагмента из базы знаний
+    found_docs = retriever.invoke(q)
+
+    print("--- Найденные чанки (Контекст): ---")
+    for i, doc in enumerate(found_docs, 1):
+        # печатаем первые 100 символов для проверки релевантности
+        print(f"Чанк {i}: {doc.page_content[:100]}...") 
+    print("-" * 30)
     # засекаем время старта
     start = time.time()
-    
+
     try:
         # отправляем вопрос в нашу цепочку
         response = agent.invoke(q)

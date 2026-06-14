@@ -44,24 +44,21 @@ def load_and_split_documents():
             except Exception as e:
                 print(f"Ошибка при чтении PDF {file}: {e}")
 
-    # если файлов не нашлось, выводим предупреждение
+    # если файлов не нашлось, возвращаем пустой список
     if not docs:
-        print(f"Предупреждение: В папке '{KNOWLEDGE_BASE_DIR}' нет файлов .txt или .pdf!")
         return []
 
-    print(f"Успешно загружено документов: {len(docs)}")
-    
+
     # настраиваем параметры разбиения текста на куски
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,      # максимальная длина одного чанка в символах  
         chunk_overlap=200,    # перекрытие между соседними чанками для сохранения контекста
         add_start_index=True  # сохраняем позицию начала чанка в исходном файле
     )
+    # нарезаем документы на части согласно заданным параметрам
+    return text_splitter.split_documents(docs)
 
-    # нарезаем документы на чанки
-    all_splits = text_splitter.split_documents(docs)
-    print(f"Разбили документы на {len(all_splits)} чанков.")
-    return all_splits
+  
 
 if __name__ == "__main__":
     # запускаем функцию загрузки и нарезки для проверки

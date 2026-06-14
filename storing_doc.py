@@ -1,22 +1,30 @@
 from vector_store import vector_store     
 from load_split_doc import load_and_split_documents
 
-# проверяем, есть ли уже какие-то чанки в нашей базе chromadb
+# получаем чанки
+all_splits = load_and_split_documents()
+
+if not all_splits:
+    print("Ошибка: Документы не найдены или пустые.")
+    exit()
+
+# используем метаданные для анализа объема данных.
+sources = set(split.metadata.get('source') for split in all_splits if 'source' in split.metadata)
+total_chars = sum(len(split.page_content) for split in all_splits)
+
+print(f"--- Статистика базы знаний ---")
+print(f"Документов: {len(sources)}")
+print(f"Чанков: {len(all_splits)}")
+print(f"Символов: {total_chars}")
+print("------------------------------")
+
+# проверяем базу
 existing_data = vector_store.get()
-
-# если в базе уже что-то лежит, то ничего заново не записываем
+# если база уже содержит данные, выводим предупреждение и не перезаписываем ее
 if existing_data and len(existing_data.get("ids", [])) > 0:
-    print(f"База данных уже содержит {len(existing_data['ids'])} чанков.")
-    print("повторная запись отменена, чтобы тексты не дублировались.")
+    print(f"База уже содержит {len(existing_data['ids'])} чанков. Запись отменена.")
 else:
-    # если база пустая, берем нарезанные куски документов
-    all_splits = load_and_split_documents()
-
-    if all_splits:
-        print("начинаю запись документов в chromadb...")
-        # добавляем документы в базу и получаем их id
-        document_ids = vector_store.add_documents(documents=all_splits)
-        print("--- успешно сохранено! ---")
-        print(f"id первых добавленных чанков: {document_ids[:3]}")
-    else:
-        print("ошибка: чанки не найдены. база данных пуста.")
+    # если база пуста, выполняем векторную индексацию
+    print("Записываю чанки в ChromaDB...")
+    vector_store.add_documents(documents=all_splits)
+    print("--- Успешно сохранено! ---")
