@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
 
 # загрузка переменных окружения из файла .env
 load_dotenv()
